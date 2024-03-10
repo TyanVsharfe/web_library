@@ -11,6 +11,7 @@ func InitRoutes(service service.AuthService, postService service.PostService, bo
 	router := gin.New()
 
 	router.POST("/register", handler.RegisterUser(service))
+	router.POST("/login", handler.RegisterUser(service))
 
 	api := router.Group("/api", middleware.AuthMiddleware)
 	{
@@ -22,6 +23,10 @@ func InitRoutes(service service.AuthService, postService service.PostService, bo
 		api.POST("/books", handler.CreateBook(bookService))
 		api.PUT("/books/:id", handler.UpdateBook(bookService))
 		api.DELETE("/books/:id", handler.DeleteBook(bookService))
+
+		api.GET("/books/title", handler.GetBooksByTitle(bookService))
+		api.GET("/books/genre")
+		api.GET("/books/author")
 	}
 	return router
 }

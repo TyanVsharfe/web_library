@@ -49,29 +49,31 @@ func (bookRepository _bookRepository) GetBook(ctx context.Context, bookId int) (
 	return model.Book(book), nil
 }
 
-func (bookRepository _bookRepository) GetBooks(ctx context.Context) ([]model.Book, error) {
+func (bookRepository _bookRepository) GetBooks(ctx context.Context) ([]model.Book, []int, error) {
 	var books []model.Book
+	var ids []int
 
 	rows, err := bookRepository.db.PgConn.Query(ctx,
-		`SELECT p.title, p.description, p.image, p.genre, p.year, p.pages, p.author FROM public.book p`)
+		`SELECT p.id, p.title, p.description, p.image, p.genre, p.year, p.pages, p.author FROM public.book p`)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка получения списка книг: %s", err.Error())
+		return nil, nil, fmt.Errorf("ошибка получения списка книг: %s", err.Error())
 	}
 
 	for rows.Next() {
 		var book dbModel.Book
-		err := rows.Scan(&book.Title, &book.Description, &book.ImageURL, &book.Genre, &book.Year, &book.Pages, &book.Author)
+		var id int
+
+		err := rows.Scan(&id, &book.Title, &book.Description, &book.ImageURL, &book.Genre, &book.Year, &book.Pages, &book.Author)
 		if err != nil {
-			return nil, fmt.Errorf("ошибка чтения книги: %s", err.Error())
+			return nil, nil, fmt.Errorf("ошибка чтения книги: %s", err.Error())
 		}
 
 		books = append(books, model.Book(book))
+		ids = append(ids, id)
 	}
 
-	return books, nil
+	return books, ids, nil
 }
-
-// TODO UpdateBook нужно дописать получение id из url
 
 func (bookRepository _bookRepository) UpdateBook(ctx context.Context, book model.Book, bookId int) (model.Book, error) {
 	bookDb := dbModel.Book(book)
@@ -110,4 +112,34 @@ func (bookRepository _bookRepository) DeleteBook(ctx context.Context, bookId int
 	}
 
 	return nil
+}
+
+func (bookRepository _bookRepository) GetBooksByTitle(ctx context.Context, bookTitle string) ([]model.Book, []int, error) {
+	var books []model.Book
+	var ids []int
+
+	rows, err := bookRepository.db.PgConn.Query(ctx,
+		`SELECT p.id, p.title, p.description, p.image, p.genre, p.year, p.pages, p.author 
+					FROM public.book p WHERE LOWER(p.title) LIKE '%' || LOWER($1) || '%'`, bookTitle)
+
+	fmt.Println(rows)
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("ошибка получения списка книг: %s", err.Error())
+	}
+
+	for rows.Next() {
+		var book dbModel.Book
+		var id int
+
+		err := rows.Scan(&id, &book.Title, &book.Description, &book.ImageURL, &book.Genre, &book.Year, &book.Pages, &book.Author)
+		if err != nil {
+			return nil, nil, fmt.Errorf("ошибка чтения книги: %s", err.Error())
+		}
+
+		books = append(books, model.Book(book))
+		ids = append(ids, id)
+	}
+
+	return books, ids, nil
 }

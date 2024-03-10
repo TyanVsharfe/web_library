@@ -39,15 +39,15 @@ func (bookService _bookService) GetBook(ctx context.Context, bookId int) (model.
 	return book, nil
 }
 
-func (bookService _bookService) GetBooks(ctx context.Context) ([]model.Book, error) {
-	books, err := bookService.repo.GetBooks(ctx)
+func (bookService _bookService) GetBooks(ctx context.Context) ([]model.Book, []int, error) {
+	books, ids, err := bookService.repo.GetBooks(ctx)
 
 	if err != nil {
 		slog.Error(err.Error())
-		return nil, errors.New("ошибка вывода книг")
+		return nil, nil, errors.New("ошибка вывода книг")
 	}
 
-	return books, nil
+	return books, ids, nil
 }
 
 func (bookService _bookService) DeleteBook(ctx context.Context, bookId int) error {
@@ -69,4 +69,15 @@ func (bookService _bookService) UpdateBook(ctx context.Context, book model.Book,
 	}
 
 	return uBook, nil
+}
+
+func (bookService _bookService) GetBooksByTitle(ctx context.Context, bookTitle string) ([]model.Book, []int, error) {
+	books, ids, err := bookService.repo.GetBooksByTitle(ctx, bookTitle)
+
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, nil, errors.New("ошибка вывода книг")
+	}
+
+	return books, ids, nil
 }

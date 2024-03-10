@@ -19,6 +19,8 @@ type BookService interface {
 	CreateBook(ctx context.Context, book model.Book) (int, error)
 	DeleteBook(ctx context.Context, bookId int) error
 	GetBook(ctx context.Context, bookId int) (model.Book, error)
-	GetBooks(ctx context.Context) ([]model.Book, error)
+	GetBooks(ctx context.Context) ([]model.Book, []int, error)
 	UpdateBook(ctx context.Context, book model.Book, bookId int) (model.Book, error)
+
+	GetBooksByTitle(ctx context.Context, bookTitle string) ([]model.Book, []int, error)
 }
