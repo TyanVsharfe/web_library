@@ -10,11 +10,6 @@ type AuthService interface {
 	GenerateToken(ctx context.Context, login, password string) (string, error)
 }
 
-type PostService interface {
-	CreatePost(ctx context.Context, post model.Post) (int, error)
-	GetPost(ctx context.Context, postId int) (model.Post, error)
-}
-
 type BookService interface {
 	CreateBook(ctx context.Context, book model.Book) (int, error)
 	DeleteBook(ctx context.Context, bookId int) error
